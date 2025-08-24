@@ -1,0 +1,108 @@
+{% extends 'oauth_manager/base.html' %}
+{% load static %}
+
+{% block title %}Privacy Policy - OAuth Hub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Privacy Policy</h1>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Last updated: {{ updated_date|default:"January 24, 2025" }}</p>
+                    
+                    <h2>1. Information We Collect</h2>
+                    <p>OAuth Hub ("we," "our," or "us") collects the following information:</p>
+                    <ul>
+                        <li><strong>OAuth Tokens:</strong> Access and refresh tokens from connected social media platforms</li>
+                        <li><strong>Profile Information:</strong> Basic profile data (name, email, profile picture) from connected accounts</li>
+                        <li><strong>Connection Logs:</strong> Timestamps and status of OAuth connections for security monitoring</li>
+                        <li><strong>Usage Data:</strong> IP addresses, browser information, and connection attempts for security purposes</li>
+                    </ul>
+
+                    <h2>2. How We Use Your Information</h2>
+                    <p>We use your information to:</p>
+                    <ul>
+                        <li>Facilitate OAuth connections to your social media accounts</li>
+                        <li>Maintain secure connections and refresh expired tokens</li>
+                        <li>Monitor for unauthorized access attempts</li>
+                        <li>Provide customer support when needed</li>
+                        <li>Comply with legal obligations</li>
+                    </ul>
+
+                    <h2>3. Information Sharing</h2>
+                    <p><strong>We do not sell, trade, or share your personal information with third parties</strong> except:</p>
+                    <ul>
+                        <li>With your explicit consent</li>
+                        <li>To comply with legal requirements</li>
+                        <li>To protect our rights and prevent fraud</li>
+                        <li>With service providers who assist in our operations (under strict confidentiality agreements)</li>
+                    </ul>
+
+                    <h2>4. Data Security</h2>
+                    <p>We implement industry-standard security measures:</p>
+                    <ul>
+                        <li><strong>Encryption:</strong> All OAuth tokens are encrypted using Fernet encryption</li>
+                        <li><strong>HTTPS:</strong> All data transmission is encrypted using SSL/TLS</li>
+                        <li><strong>Access Controls:</strong> Limited access to personal data on a need-to-know basis</li>
+                        <li><strong>Regular Security Audits:</strong> Ongoing monitoring and security assessments</li>
+                    </ul>
+
+                    <h2>5. Data Retention</h2>
+                    <p>We retain your data:</p>
+                    <ul>
+                        <li><strong>OAuth Tokens:</strong> Until you disconnect the platform or tokens expire</li>
+                        <li><strong>Connection Logs:</strong> For 90 days for security monitoring</li>
+                        <li><strong>Profile Data:</strong> Until you request deletion or disconnect all platforms</li>
+                    </ul>
+
+                    <h2>6. Your Rights</h2>
+                    <p>You have the right to:</p>
+                    <ul>
+                        <li><strong>Access:</strong> Request a copy of your data</li>
+                        <li><strong>Correction:</strong> Update or correct your information</li>
+                        <li><strong>Deletion:</strong> Request deletion of your data (see Data Deletion page)</li>
+                        <li><strong>Portability:</strong> Request your data in a portable format</li>
+                        <li><strong>Disconnect:</strong> Remove OAuth connections at any time</li>
+                    </ul>
+
+                    <h2>7. Cookies and Tracking</h2>
+                    <p>We use essential cookies for:</p>
+                    <ul>
+                        <li>Session management and user authentication</li>
+                        <li>CSRF protection during OAuth flows</li>
+                        <li>Remembering your connection preferences</li>
+                    </ul>
+                    <p>We do not use tracking cookies or third-party analytics.</p>
+
+                    <h2>8. International Data Transfers</h2>
+                    <p>Your data may be processed in countries outside your residence. We ensure adequate protection through:</p>
+                    <ul>
+                        <li>Standard contractual clauses</li>
+                        <li>Adequate country determinations</li>
+                        <li>Your explicit consent where required</li>
+                    </ul>
+
+                    <h2>9. Changes to This Policy</h2>
+                    <p>We may update this privacy policy. Changes will be posted on this page with an updated revision date. Continued use of our service constitutes acceptance of changes.</p>
+
+                    <h2>10. Contact Us</h2>
+                    <p>For questions about this privacy policy or your data:</p>
+                    <ul>
+                        <li><strong>Email:</strong> privacy@oauthhub.com</li>
+                        <li><strong>Data Deletion:</strong> <a href="{% url 'data_deletion' %}" class="btn btn-outline-danger btn-sm">Request Data Deletion</a></li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Compliance:</strong> This privacy policy complies with GDPR, CCPA, and Facebook Platform Policy requirements.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

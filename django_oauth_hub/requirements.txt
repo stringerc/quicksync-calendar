@@ -1,0 +1,9 @@
+Django==4.2.7
+requests==2.31.0
+cryptography==41.0.7
+python-dotenv==1.0.0
+django-cors-headers==4.3.1
+psycopg2-binary==2.9.7
+dj-database-url==2.1.0
+whitenoise==6.6.0
+gunicorn==21.2.0

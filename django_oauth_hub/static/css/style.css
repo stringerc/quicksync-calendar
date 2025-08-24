@@ -1,0 +1,48 @@
+/* Custom CSS for OAuth Hub */
+
+/* Add any additional custom styles here */
+.oauth-hub-custom {
+    /* Custom styles specific to OAuth Hub */
+}
+
+/* Platform-specific hover effects */
+.platform-card:hover .platform-icon.facebook {
+    transform: scale(1.1);
+}
+
+.platform-card:hover .platform-icon.instagram {
+    transform: scale(1.1);
+}
+
+.platform-card:hover .platform-icon.twitter {
+    transform: scale(1.1);
+}
+
+.platform-card:hover .platform-icon.linkedin {
+    transform: scale(1.1);
+}
+
+.platform-card:hover .platform-icon.youtube {
+    transform: scale(1.1);
+}
+
+.platform-card:hover .platform-icon.tiktok {
+    transform: scale(1.1);
+}
+
+.platform-card:hover .platform-icon.pinterest {
+    transform: scale(1.1);
+}
+
+/* Responsive improvements */
+@media (max-width: 576px) {
+    .platform-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+    }
+}

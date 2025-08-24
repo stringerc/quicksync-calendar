@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load oauth_extras %}
+
+{% block title %}Dashboard - OAuth Hub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="card-title mb-1">Social Media Connections</h2>
+                        <p class="text-muted mb-0">Manage your OAuth connections to social media platforms</p>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">Connected: <strong id="connected-count">0</strong> / {{ connections|length }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for platform_key, connection in connections.items %}
+        {% with platform_info=platforms|default:""  %}
+            {% if platform_key in platforms %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card platform-card h-100 d-flex flex-column" data-platform="{{ platform_key }}">
+                        <div class="card-body d-flex flex-column">
+                            <!-- Status Badge -->
+                            <span class="status-badge status-{{ connection.status }}">
+                                {% if connection.status == 'connected' %}
+                                    <i class="fas fa-check-circle me-1"></i>Connected
+                                {% elif connection.status == 'connecting' %}
+                                    <i class="fas fa-spinner fa-spin me-1"></i>Connecting
+                                {% elif connection.status == 'expired' %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Expired
+                                {% elif connection.status == 'error' %}
+                                    <i class="fas fa-times-circle me-1"></i>Error
+                                {% else %}
+                                    <i class="fas fa-circle me-1"></i>Not Connected
+                                {% endif %}
+                            </span>
+                            
+                            <!-- Platform Icon -->
+                            <div class="platform-icon {{ platform_key }} mx-auto">
+                                {% if platform_key == 'facebook' %}
+                                    <i class="fab fa-facebook-f"></i>
+                                {% elif platform_key == 'instagram' %}
+                                    <i class="fab fa-instagram"></i>
+                                {% elif platform_key == 'twitter' %}
+                                    <i class="fab fa-twitter"></i>
+                                {% elif platform_key == 'linkedin' %}
+                                    <i class="fab fa-linkedin-in"></i>
+                                {% elif platform_key == 'youtube' %}
+                                    <i class="fab fa-youtube"></i>
+                                {% elif platform_key == 'tiktok' %}
+                                    <i class="fab fa-tiktok"></i>
+                                {% elif platform_key == 'pinterest' %}
+                                    <i class="fab fa-pinterest-p"></i>
+                                {% else %}
+                                    <i class="fas fa-share-alt"></i>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Platform Title -->
+                            <h5 class="card-title text-center text-capitalize mb-3">{{ connection.get_platform_display }}</h5>
+                            
+                            <!-- Connection Details -->
+                            {% if connection.is_connected %}
+                                <div class="connection-details mb-3">
+                                    {% if connection.platform_username %}
+                                        <p class="mb-1 small">
+                                            <i class="fas fa-user me-2 text-muted"></i>
+                                            <strong>{{ connection.platform_username }}</strong>
+                                        </p>
+                                    {% endif %}
+                                    {% if connection.platform_email %}
+                                        <p class="mb-1 small">
+                                            <i class="fas fa-envelope me-2 text-muted"></i>
+                                            {{ connection.platform_email }}
+                                        </p>
+                                    {% endif %}
+                                    {% if connection.last_used_at %}
+                                        <p class="mb-1 small">
+                                            <i class="fas fa-clock me-2 text-muted"></i>
+                                            Last used: {{ connection.last_used_at|date:"M d, Y H:i" }}
+                                        </p>
+                                    {% endif %}
+                                    {% if connection.token_expires_at %}
+                                        <p class="mb-1 small">
+                                            <i class="fas fa-hourglass-half me-2 text-muted"></i>
+                                            Expires: {{ connection.token_expires_at|date:"M d, Y H:i" }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            {% elif connection.status == 'error' %}
+                                <div class="alert alert-danger p-2 mb-3" role="alert">
+                                    <small>
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ connection.last_error_message|truncatechars:100 }}
+                                    </small>
+                                </div>
+                            {% elif connection.status == 'expired' %}
+                                <div class="alert alert-warning p-2 mb-3" role="alert">
+                                    <small>
+                                        <i class="fas fa-hourglass-end me-1"></i>
+                                        Access token has expired. Please reconnect.
+                                    </small>
+                                </div>
+                            {% else %}
+                                <p class="text-muted text-center mb-3 small">Click Configure to connect your {{ connection.get_platform_display }} account</p>
+                            {% endif %}
+                            
+                            <!-- Platform Configuration Status -->
+                            {% if platform_key|lookup:platforms %}
+                                {% with platform_config=platform_key|lookup:platforms %}
+                                    {% if not platform_config.client_id %}
+                                        <div class="alert alert-warning p-2 mb-3" role="alert">
+                                            <small>
+                                                <i class="fas fa-cog me-1"></i>
+                                                Platform not configured. Check environment variables.
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                            
+                            <!-- Action Button -->
+                            <div class="mt-auto">
+                                {% with platform_config=platform_key|lookup:platforms %}
+                                    {% if connection.is_connected %}
+                                        <button 
+                                            class="btn btn-disconnect btn-platform" 
+                                            onclick="handlePlatformAction('{{ platform_key }}', 'disconnect')"
+                                            {% if not platform_config.client_id %}disabled{% endif %}
+                                        >
+                                            <i class="fas fa-unlink me-2"></i>Disconnect
+                                        </button>
+                                    {% else %}
+                                        <form method="post" action="{% url 'oauth_initiate' platform_key %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button 
+                                                type="submit" 
+                                                class="btn btn-configure btn-platform"
+                                                {% if not platform_config.client_id %}disabled{% endif %}
+                                            >
+                                                {% if connection.status == 'error' or connection.status == 'expired' %}
+                                                    <i class="fas fa-redo me-2"></i>Reconnect
+                                                {% else %}
+                                                    <i class="fas fa-link me-2"></i>Configure
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+    {% endfor %}
+</div>
+
+<!-- Connection Summary -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Connection Summary</h5>
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <h3 class="text-success mb-1" id="summary-connected">0</h3>
+                            <p class="text-muted mb-0 small">Connected</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <h3 class="text-warning mb-1" id="summary-expired">0</h3>
+                            <p class="text-muted mb-0 small">Expired</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <h3 class="text-danger mb-1" id="summary-error">0</h3>
+                            <p class="text-muted mb-0 small">Errors</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3">
+                            <h3 class="text-muted mb-1" id="summary-disconnected">0</h3>
+                            <p class="text-muted mb-0 small">Not Connected</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Setup Instructions -->
+{% if user.username == 'demo_user' %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info" role="alert">
+            <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Demo Mode</h5>
+            <p class="mb-0">
+                You're using a demo account. To test OAuth connections, you'll need to configure the platform credentials in your environment variables. 
+                Check the <code>.env.example</code> file for the required settings.
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Count and update connection statuses
+    const statusCounts = {
+        connected: 0,
+        expired: 0,
+        error: 0,
+        disconnected: 0
+    };
+    
+    // Count status badges
+    document.querySelectorAll('.status-badge').forEach(badge => {
+        if (badge.classList.contains('status-connected')) {
+            statusCounts.connected++;
+        } else if (badge.classList.contains('status-expired')) {
+            statusCounts.expired++;
+        } else if (badge.classList.contains('status-error')) {
+            statusCounts.error++;
+        } else {
+            statusCounts.disconnected++;
+        }
+    });
+    
+    // Update counters
+    document.getElementById('connected-count').textContent = statusCounts.connected;
+    document.getElementById('summary-connected').textContent = statusCounts.connected;
+    document.getElementById('summary-expired').textContent = statusCounts.expired;
+    document.getElementById('summary-error').textContent = statusCounts.error;
+    document.getElementById('summary-disconnected').textContent = statusCounts.disconnected;
+    
+    // Auto-refresh page every 30 seconds to update token expiration status
+    setInterval(() => {
+        // Only refresh if no ongoing loading states
+        if (!document.querySelector('.loading')) {
+            window.location.reload();
+        }
+    }, 30000);
+});
+
+// Handle form submissions with loading states
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        const button = form.querySelector('button[type="submit"]');
+        if (button) {
+            button.disabled = true;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Connecting...';
+            
+            // Re-enable after 10 seconds to prevent permanent lock
+            setTimeout(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }, 10000);
+        }
+    });
+});
+</script>
+{% endblock %}

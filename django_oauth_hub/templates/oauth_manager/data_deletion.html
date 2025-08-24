@@ -1,0 +1,133 @@
+{% extends 'oauth_manager/base.html' %}
+{% load static %}
+
+{% block title %}Data Deletion - OAuth Hub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-danger text-white">
+                    <h1 class="mb-0"><i class="fas fa-trash-alt me-2"></i>Data Deletion Request</h1>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> This action will permanently delete all your data from OAuth Hub.
+                    </div>
+
+                    <h3>What Will Be Deleted</h3>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item"><i class="fas fa-key text-primary me-2"></i>All OAuth access and refresh tokens</li>
+                        <li class="list-group-item"><i class="fas fa-link text-info me-2"></i>All social media platform connections</li>
+                        <li class="list-group-item"><i class="fas fa-user text-success me-2"></i>Profile information and preferences</li>
+                        <li class="list-group-item"><i class="fas fa-history text-secondary me-2"></i>Connection logs and activity history</li>
+                        <li class="list-group-item"><i class="fas fa-database text-dark me-2"></i>All associated account data</li>
+                    </ul>
+
+                    <h3>Deletion Process</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-clock text-warning me-2"></i>Timeline</h5>
+                                    <p class="card-text">Data deletion is processed within <strong>30 days</strong> of your request.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-shield-alt text-success me-2"></i>Verification</h5>
+                                    <p class="card-text">We'll send a confirmation email to verify your identity before deletion.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-user me-2"></i>
+                        <strong>Current User:</strong> {{ user.username }} ({{ user.email|default:"No email provided" }})
+                    </div>
+
+                    <form method="post" class="deletion-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Deletion (Optional)</label>
+                            <select class="form-select" id="reason" name="reason">
+                                <option value="">Select a reason...</option>
+                                <option value="no_longer_needed">No longer need the service</option>
+                                <option value="privacy_concerns">Privacy concerns</option>
+                                <option value="switching_services">Switching to different service</option>
+                                <option value="account_compromise">Account security concerns</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="additional_info" class="form-label">Additional Information (Optional)</label>
+                            <textarea class="form-control" id="additional_info" name="additional_info" rows="3" placeholder="Any additional details..."></textarea>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="confirm_deletion" name="confirm_deletion" required>
+                            <label class="form-check-label" for="confirm_deletion">
+                                I understand this action is <strong>irreversible</strong> and will permanently delete all my data.
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-trash-alt me-2"></i>Request Data Deletion
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel and Return to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Please <a href="{% url 'dashboard' %}" class="alert-link">log in</a> to request data deletion.
+                    </div>
+                    {% endif %}
+
+                    <hr class="my-4">
+                    
+                    <h3>Alternative: Quick Disconnect</h3>
+                    <p>If you only want to remove OAuth connections without deleting your account:</p>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-unlink me-2"></i>Disconnect All Platforms
+                    </a>
+
+                    <hr class="my-4">
+                    
+                    <h3>Need Help?</h3>
+                    <p>Contact our support team if you have questions about data deletion:</p>
+                    <ul>
+                        <li><strong>Email:</strong> privacy@oauthhub.com</li>
+                        <li><strong>Response Time:</strong> Within 24 hours</li>
+                        <li><strong>Phone:</strong> Available for verified deletion requests</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add confirmation dialog for deletion request
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.deletion-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!confirm('Are you absolutely sure you want to delete all your data? This action cannot be undone.')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
